@@ -64,7 +64,7 @@ function openAddDialog() {
   addDialogVisible.value = true
 }
 
-function onNewClientSaved(client: Record<string, unknown>) {
+function onNewClientSaved(client: { id?: string; firstName?: string; lastName?: string; email?: string; phone?: string; defaultAddress?: string }) {
   const option: ClientOption = {
     id: client.id as string,
     firstName: client.firstName as string,

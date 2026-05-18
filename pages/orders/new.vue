@@ -193,10 +193,10 @@ function onDeliveryMethodChange() {
   if (method) form.deliveryCost = Number(method.defaultCost)
 }
 
-function onClientSelected(client: Record<string, unknown>) {
-  selectedClient.value = client
+function onClientSelected(client: { id?: string; firstName?: string; lastName?: string; fullName?: string; email?: string; phone?: string; defaultAddress?: string }) {
+  selectedClient.value = client as Record<string, unknown>
   if (client.defaultAddress && !form.deliveryDetails) {
-    form.deliveryDetails = client.defaultAddress as string
+    form.deliveryDetails = client.defaultAddress
   }
 }
 
@@ -217,7 +217,7 @@ const previewOrder = computed(() => ({
   orderNumber: 'PODGLĄD',
   createdAt: new Date().toISOString(),
   brand: selectedBrand.value ?? brands.value.find(b => b.id === form.brandId),
-  client: selectedClient.value,
+  client: selectedClient.value ?? undefined,
   deliveryMethod: deliveryMethods.value.find(m => m.id === form.deliveryMethodId),
   deliveryMethodName: deliveryMethods.value.find(m => m.id === form.deliveryMethodId)?.name ?? '',
   deliveryDetails: form.deliveryDetails,

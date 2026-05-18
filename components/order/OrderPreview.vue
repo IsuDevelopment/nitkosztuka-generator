@@ -104,7 +104,7 @@
 interface OrderItem {
   id: string
   name: string
-  details?: string
+  details?: string | null
   quantity: number
   unitPrice: number | string
   materialCost?: number | string
@@ -112,22 +112,22 @@ interface OrderItem {
 
 interface OrderData {
   id?: string
-  orderNumber?: string
+  orderNumber?: string | null
   createdAt?: string
-  brand?: { name?: string; subtitle?: string }
-  client?: { firstName?: string; lastName?: string; email?: string; phone?: string }
-  deliveryMethod?: { name?: string }
-  deliveryMethodName?: string
-  deliveryDetails?: string
-  deliveryCost?: number | string
-  discount?: number | string
-  discountNote?: string
-  taxRateId?: string
-  taxAmount?: number | string
-  paymentText?: string
-  handmadeText?: string
-  leadTime?: string
-  paymentStatus?: string
+  brand?: { name?: string | null; subtitle?: string | null }
+  client?: { firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null } | null
+  deliveryMethod?: { name?: string | null }
+  deliveryMethodName?: string | null
+  deliveryDetails?: string | null
+  deliveryCost?: number | string | null
+  discount?: number | string | null
+  discountNote?: string | null
+  taxRateId?: string | null
+  taxAmount?: number | string | null
+  paymentText?: string | null
+  handmadeText?: string | null
+  leadTime?: string | null
+  paymentStatus?: string | null
   items?: OrderItem[]
 }
 

@@ -41,7 +41,7 @@
       </DataTable>
     </template>
 
-    <ClientFormDialog v-model:visible="editDialogVisible" :edit-client="(client as unknown as Record<string, string>)" @saved="refresh" />
+    <ClientFormDialog v-model:visible="editDialogVisible" :edit-client="(client as unknown as { id?: string; firstName?: string; lastName?: string; email?: string; phone?: string; defaultAddress?: string; notes?: string })" @saved="() => refresh()" />
   </div>
 </template>
 

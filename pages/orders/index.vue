@@ -12,9 +12,9 @@
         <InputIcon class="pi pi-search" />
         <InputText v-model="filters.search" :placeholder="$t('action.search')" @input="debouncedFetch" />
       </IconField>
-      <Select v-model="filters.acceptanceStatus" :options="acceptanceOptions" option-label="label" option-value="value" :placeholder="$t('field.acceptanceStatus')" show-clear @change="fetch" />
-      <Select v-model="filters.paymentStatus" :options="paymentOptions" option-label="label" option-value="value" :placeholder="$t('field.paymentStatus')" show-clear @change="fetch" />
-      <Select v-model="filters.deliveryStatus" :options="deliveryOptions" option-label="label" option-value="value" :placeholder="$t('field.deliveryStatus')" show-clear @change="fetch" />
+      <Select v-model="filters.acceptanceStatus" :options="acceptanceOptions" option-label="label" option-value="value" :placeholder="$t('field.acceptanceStatus')" show-clear @change="() => fetch()" />
+      <Select v-model="filters.paymentStatus" :options="paymentOptions" option-label="label" option-value="value" :placeholder="$t('field.paymentStatus')" show-clear @change="() => fetch()" />
+      <Select v-model="filters.deliveryStatus" :options="deliveryOptions" option-label="label" option-value="value" :placeholder="$t('field.deliveryStatus')" show-clear @change="() => fetch()" />
     </div>
 
     <DataTable

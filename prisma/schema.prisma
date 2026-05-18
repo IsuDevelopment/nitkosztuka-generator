@@ -126,8 +126,8 @@ model Order {
 
   brand          Brand           @relation(fields: [brandId], references: [id])
   client         Client          @relation(fields: [clientId], references: [id])
-  deliveryMethod DeliveryMethod? @relation(fields: [deliveryMethodId], references: [id])
-  taxRate        TaxRate?        @relation(fields: [taxRateId], references: [id])
+  deliveryMethod DeliveryMethod? @relation(fields: [deliveryMethodId], references: [id], onDelete: SetNull)
+  taxRate        TaxRate?        @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
   createdBy      User            @relation(fields: [createdById], references: [id])
   items          OrderItem[]
 

@@ -20,7 +20,7 @@ export async function logAudit(
       action,
       entityType,
       entityId,
-      changes: changes ?? null,
+      changes: changes as never,
     },
   })
 }

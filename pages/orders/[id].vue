@@ -6,9 +6,9 @@
         <div>
           <h1>{{ order.orderNumber }}</h1>
           <div class="flex gap-2 mt-1">
-            <OrderStatusBadge type="acceptance" :value="order.acceptanceStatus" />
-            <OrderStatusBadge type="payment" :value="order.paymentStatus" />
-            <OrderStatusBadge type="delivery" :value="order.deliveryStatus" />
+            <OrderStatusBadge type="acceptance" :value="(order.acceptanceStatus as string)" />
+            <OrderStatusBadge type="payment" :value="(order.paymentStatus as string)" />
+            <OrderStatusBadge type="delivery" :value="(order.deliveryStatus as string)" />
           </div>
         </div>
       </div>
@@ -57,7 +57,7 @@
 
         <div class="status-section">
           <div class="label">{{ $t('field.createdBy') }}</div>
-          <div>{{ order.createdBy?.name }}</div>
+          <div>{{ (order.createdBy as { name?: string } | undefined)?.name }}</div>
           <div class="muted">{{ formatDate(order.createdAt) }}</div>
         </div>
       </div>
@@ -200,8 +200,6 @@ const deliveryOptions = [
 function printPage() {
   if (process.client) window.print()
 }
-
-const { t: $t } = useI18n()
 </script>
 
 <style scoped>

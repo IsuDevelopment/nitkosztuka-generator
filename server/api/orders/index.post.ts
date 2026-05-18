@@ -17,7 +17,6 @@ interface CreateOrderBody {
   brandId: string
   clientId: string
   deliveryMethodId?: string
-  deliveryMethodName?: string
   deliveryDetails?: string
   deliveryCost?: number
   leadTime?: string
@@ -51,6 +50,14 @@ export default defineEventHandler(async (event) => {
   })
   const orderNumber = buildOrderNumber(brand.name, year, count + 1)
 
+  // Snapshot delivery method name from DB — never trust frontend string
+  let snapshotDeliveryMethodName: string | null = null
+  if (body.deliveryMethodId) {
+    const method = await prisma.deliveryMethod.findUnique({ where: { id: body.deliveryMethodId } })
+    if (!method) throw createError({ statusCode: 400, message: 'Nie znaleziono metody dostawy' })
+    snapshotDeliveryMethodName = method.name
+  }
+
   // Compute tax
   const itemsTotal = body.items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
   const revenue = itemsTotal - (body.discount ?? 0) + (body.deliveryCost ?? 0)
@@ -68,7 +75,7 @@ export default defineEventHandler(async (event) => {
       brandId: body.brandId,
       clientId: body.clientId,
       deliveryMethodId: body.deliveryMethodId ?? null,
-      deliveryMethodName: body.deliveryMethodName?.trim() ?? null,
+      deliveryMethodName: snapshotDeliveryMethodName,
       deliveryDetails: body.deliveryDetails?.trim() ?? null,
       deliveryCost: body.deliveryCost ?? 0,
       leadTime: body.leadTime?.trim() || brand.defaultLeadTime,

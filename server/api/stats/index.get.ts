@@ -10,7 +10,6 @@ export default defineEventHandler(async (event) => {
 
   const orders = await prisma.order.findMany({
     where: { createdAt: { gte: fromDate, lte: toDate } },
-    include: { items: true },
     select: {
       id: true,
       createdAt: true,

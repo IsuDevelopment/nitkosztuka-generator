@@ -9,7 +9,6 @@ export default defineEventHandler(async (event) => {
     include: {
       brand: true,
       client: true,
-      deliveryMethod: true,
       taxRate: true,
       items: { orderBy: { sortOrder: 'asc' } },
       createdBy: { select: { id: true, name: true, login: true } },
