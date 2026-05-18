@@ -1,0 +1,42 @@
+{
+  "name": "nitko-sztuka-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@nuxtjs/i18n": "^9.5.5",
+    "@primeuix/themes": "^1.0.0",
+    "@primevue/nuxt-module": "^4.3.5",
+    "bcryptjs": "^3.0.2",
+    "nuxt": "^3.16.2",
+    "nuxt-auth-utils": "^0.5.16",
+    "primevue": "^4.3.5",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@prisma/client": "^6.8.2",
+    "@tailwindcss/vite": "^4.1.7",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^25.9.0",
+    "prisma": "^6.8.2",
+    "tailwindcss": "^4.1.7",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

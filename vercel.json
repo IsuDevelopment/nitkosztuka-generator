@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".output/public",
+  "framework": "nuxtjs",
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "NUXT_SESSION_SECRET": "@nuxt-session-secret",
+    "ADMIN_PASSWORD": "@admin-password"
+  }
+}

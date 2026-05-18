@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generator podsumowania ustaleń zamówienia</title>
+  <style>
+    :root {
+      --bg: #f7f3ef;
+      --card: #ffffff;
+      --text: #2d2825;
+      --muted: #746b65;
+      --line: #e9ded6;
+      --accent: #b48a72;
+      --accent-dark: #8c6250;
+      --soft: #fbf7f3;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.45; }
+    .app { max-width: 1180px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 410px 1fr; gap: 24px; }
+    .panel, .preview { background: var(--card); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 14px 36px rgba(60,45,35,.08); }
+    .panel { padding: 22px; }
+    .panel h1 { font-size: 22px; margin: 0 0 6px; }
+    .panel p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+    .section-title { margin: 22px 0 10px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--accent-dark); font-weight: 800; font-size: 15px; }
+    label { display: block; margin: 12px 0 6px; font-size: 13px; font-weight: 700; }
+    input, textarea, select { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font: inherit; color: var(--text); background: #fff; }
+    textarea { min-height: 84px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .row-3 { display: grid; grid-template-columns: 90px 1fr 1fr; gap: 10px; }
+    .product { padding: 12px; margin-bottom: 10px; background: var(--soft); border: 1px solid var(--line); border-radius: 14px; }
+    .product-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--accent-dark); font-weight: 800; }
+    button { font: inherit; }
+    .remove-btn, .secondary-btn, .primary-btn { border-radius: 999px; padding: 10px 14px; cursor: pointer; font-weight: 800; }
+    .remove-btn { padding: 7px 10px; border: 1px solid #ecd0d0; background: #fff; color: #a24d4d; font-size: 12px; }
+    .secondary-btn { width: 100%; margin-top: 6px; border: 1px solid var(--line); background: #fff; color: var(--accent-dark); }
+    .primary-btn { width: 100%; margin-top: 12px; border: 0; background: var(--accent); color: #fff; font-size: 15px; }
+    .preview { padding: 30px; }
+    .paper { width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto; padding: 18mm; background: #fff; border: 1px solid var(--line); }
+    .brand { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding-bottom: 14px; margin-bottom: 20px; border-bottom: 2px solid var(--line); }
+    .logo { font-size: 25px; font-weight: 900; color: var(--accent-dark); }
+    .sublogo { margin-top: 2px; color: var(--muted); font-size: 13px; }
+    .date { text-align: right; color: var(--muted); font-size: 13px; }
+    .paper h2 { margin: 0 0 8px; font-size: 24px; }
+    .intro { margin: 0 0 22px; color: var(--muted); }
+    .box { margin-bottom: 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; break-inside: avoid; }
+    .box-title { margin-bottom: 8px; color: var(--accent-dark); font-weight: 900; }
+    .field-label { display: block; color: var(--muted); font-size: 12px; }
+    .field-value { display: block; font-weight: 700; white-space: pre-line; }
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+    .product-summary { margin-top: 8px; padding: 11px 12px; border-radius: 12px; background: var(--soft); font-size: 14px; }
+    .product-summary strong { display: block; margin-bottom: 4px; font-size: 15px; }
+    .product-line { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+    .product-price { text-align: right; font-weight: 800; white-space: nowrap; }
+    .payment-note, .handmade-note { margin-top: 10px; padding: 12px 14px; border-radius: 14px; background: #fff8f2; border: 1px solid #ead8ca; color: #5f514a; font-size: 13px; }
+    .money-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .money-table td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+    .money-table td:last-child { text-align: right; font-weight: 800; }
+    .money-table tr.total td { border-bottom: 0; padding-top: 12px; color: var(--accent-dark); font-size: 18px; }
+    .footer { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 12px; }
+    .copy-area { margin-top: 16px; padding: 14px; background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+    .copy-area textarea { min-height: 320px; background: var(--soft); font-size: 14px; }
+    .hint { margin-top: 8px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 980px) { .app { grid-template-columns: 1fr; } .paper { min-height: auto; } }
+    @media print {
+      body { background: #fff; }
+      .panel, .copy-area, .no-print { display: none !important; }
+      .app { display: block; max-width: none; padding: 0; }
+      .preview { padding: 0; border: 0; box-shadow: none; }
+      .paper { width: 210mm; min-height: 297mm; padding: 14mm; border: 0; }
+      @page { size: A4; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel no-print">
+      <h1>Generator podsumowania ustaleń</h1>
+      <p>Dodaj kilka produktów, a generator automatycznie zsumuje wartość produktów, dostawę i całość zamówienia.</p>
+
+      <label>Nazwa marki</label>
+      <input id="brandName" value="Nitkowa Sztuka">
+
+      <label>Data</label>
+      <input id="date" type="date">
+
+      <div class="section-title">Dane klienta</div>
+      <label>Imię i nazwisko</label>
+      <input id="clientName" placeholder="np. Barbara Kubica">
+      <label>Kontakt, opcjonalnie</label>
+      <input id="clientContact" placeholder="np. telefon lub e-mail">
+
+      <div class="section-title">Dostawa</div>
+      <label>Forma dostawy</label>
+      <input id="deliveryMethod" value="InPost">
+      <label>Dane do wysyłki</label>
+      <textarea id="deliveryDetails" placeholder="np. paczkomat, adres, kod pocztowy, miejscowość"></textarea>
+      <div class="row">
+        <div><label>Koszt dostawy</label><input id="deliveryPrice" type="number" min="0" step="0.01" value="19"></div>
+        <div><label>Czas realizacji</label><input id="leadTime" value="7–10 dni roboczych"></div>
+      </div>
+
+      <div class="section-title">Produkty / ustalenia</div>
+      <div id="products"></div>
+      <button class="secondary-btn" type="button" onclick="addProduct()">+ Dodaj produkt</button>
+
+      <div class="section-title">Płatność</div>
+      <label>Status płatności</label>
+      <select id="paymentStatus">
+        <option>do opłacenia</option>
+        <option>opłacono</option>
+        <option>zaliczka opłacona</option>
+      </select>
+      <label>Informacja o płatności</label>
+      <textarea id="paymentText">Płatność BLIK na numer telefonu: 669618009. Jeśli ktoś woli płatność na numer konta, podam numer konta w osobnej wiadomości.</textarea>
+      <label>Informacja o rękodziele</label>
+      <textarea id="handmadeText">Produkty są wykonywane ręcznie, dlatego każdy egzemplarz jest wyjątkowy. Kolory, układ sznurka i drobne detale mogą delikatnie różnić się od zdjęć lub wcześniejszych realizacji.</textarea>
+      <button class="primary-btn" type="button" onclick="window.print()">Drukuj / zapisz jako PDF</button>
+    </section>
+
+    <section class="preview">
+      <article class="paper">
+        <header class="brand">
+          <div>
+            <div class="logo" data-preview="brandName">Nitkowa Sztuka</div>
+            <div class="sublogo">rękodzieło tworzone z sercem</div>
+          </div>
+          <div class="date"><strong>Podsumowanie ustaleń</strong><br>Data: <span data-preview="date">—</span></div>
+        </header>
+        <h2>Podsumowanie ustaleń zamówienia</h2>
+        <p class="intro">Poniżej znajduje się potwierdzenie najważniejszych informacji dotyczących zamówienia.</p>
+        <section class="box">
+          <div class="box-title">Dane klienta</div>
+          <div class="details-grid">
+            <div><span class="field-label">Imię i nazwisko</span><span class="field-value" data-preview="clientName">—</span></div>
+            <div><span class="field-label">Kontakt</span><span class="field-value" data-preview="clientContact">—</span></div>
+          </div>
+        </section>
+        <section class="box">
+          <div class="box-title">Dostawa</div>
+          <div class="details-grid">
+            <div><span class="field-label">Forma dostawy</span><span class="field-value" data-preview="deliveryMethod">—</span></div>
+            <div><span class="field-label">Dane do wysyłki</span><span class="field-value" data-preview="deliveryDetails">—</span></div>
+          </div>
+        </section>
+        <section class="box">
+          <div class="box-title">Produkty / ustalenia</div>
+          <div id="productsPreview"></div>
+        </section>
+        <section class="box">
+          <div class="box-title">Płatność</div>
+          <table class="money-table"><tbody id="moneyRows"></tbody></table>
+          <div style="margin-top: 10px;">Status płatności: <strong data-preview="paymentStatus">—</strong></div>
+          <div class="payment-note" data-preview="paymentText"></div>
+        </section>
+        <section class="box"><div class="box-title">Czas realizacji</div><strong data-preview="leadTime">—</strong></section>
+        <section class="handmade-note"><strong>Informacja o rękodziele:</strong><br><span data-preview="handmadeText"></span></section>
+        <footer class="footer">Dziękuję za zamówienie ♡</footer>
+      </article>
+      <div class="copy-area no-print">
+        <label>Wersja do skopiowania i wysłania klientowi</label>
+        <textarea id="messageOutput" readonly></textarea>
+        <button class="secondary-btn" type="button" onclick="copyMessage()">Kopiuj wiadomość</button>
+        <div class="hint">Treść możesz wkleić w wiadomości prywatnej, SMS-ie lub e-mailu.</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const fields = ['brandName','date','clientName','clientContact','deliveryMethod','deliveryDetails','deliveryPrice','leadTime','paymentStatus','paymentText','handmadeText'];
+    let productCounter = 0;
+    function getValue(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+    function escapeHtml(value) { return String(value || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+    function formatMoney(value) { const number = Number(value || 0); return number.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' zł'; }
+    function addProduct(data = {}) {
+      productCounter++;
+      const product = document.createElement('div');
+      product.className = 'product';
+      product.dataset.product = 'true';
+      product.innerHTML = `
+        <div class="product-head"><span>Produkt ${productCounter}</span><button class="remove-btn" type="button" onclick="removeProduct(this)">Usuń</button></div>
+        <label>Nazwa produktu</label>
+        <input data-product-field="name" value="${escapeHtml(data.name || '')}" placeholder="np. Ramka z aniołkiem">
+        <label>Ustalenia / opis produktu</label>
+        <textarea data-product-field="details" placeholder="np. kolor, imię, data, dedykacja, wersja, dodatki">${escapeHtml(data.details || '')}</textarea>
+        <div class="row-3">
+          <div><label>Ilość</label><input data-product-field="qty" type="number" min="1" step="1" value="${escapeHtml(data.qty || 1)}"></div>
+          <div><label>Cena za szt.</label><input data-product-field="price" type="number" min="0" step="0.01" value="${escapeHtml(data.price || '')}"></div>
+          <div><label>Razem</label><input data-product-field="total" readonly></div>
+        </div>`;
+      document.getElementById('products').appendChild(product);
+      product.querySelectorAll('input, textarea').forEach(input => input.addEventListener('input', updatePreview));
+      updatePreview();
+    }
+    function removeProduct(button) { button.closest('[data-product="true"]').remove(); updatePreview(); }
+    function getProducts() {
+      return Array.from(document.querySelectorAll('[data-product="true"]')).map((product, index) => {
+        const qty = Number(product.querySelector('[data-product-field="qty"]').value || 1);
+        const price = Number(product.querySelector('[data-product-field="price"]').value || 0);
+        const total = qty * price;
+        const totalInput = product.querySelector('[data-product-field="total"]');
+        if (totalInput) totalInput.value = formatMoney(total);
+        return { index: index + 1, name: product.querySelector('[data-product-field="name"]').value.trim(), details: product.querySelector('[data-product-field="details"]').value.trim(), qty, price, total };
+      });
+    }
+    function updatePreview() {
+      fields.forEach(id => document.querySelectorAll(`[data-preview="${id}"]`).forEach(target => target.textContent = getValue(id) || '—'));
+      const products = getProducts();
+      const productsPreview = document.getElementById('productsPreview');
+      productsPreview.innerHTML = !products.length ? '<div class="product-summary">Brak dodanych produktów.</div>' : products.map(product => `
+        <div class="product-summary"><div class="product-line"><div><strong>${escapeHtml(product.name || 'Produkt ' + product.index)}</strong>${escapeHtml(product.details || 'Brak opisu / ustaleń')}<br>Ilość: ${product.qty} × ${formatMoney(product.price)}</div><div class="product-price">${formatMoney(product.total)}</div></div></div>`).join('');
+      const productsTotal = products.reduce((sum, product) => sum + product.total, 0);
+      const deliveryPrice = Number(getValue('deliveryPrice') || 0);
+      const total = productsTotal + deliveryPrice;
+      document.getElementById('moneyRows').innerHTML = `<tr><td>Produkty</td><td>${formatMoney(productsTotal)}</td></tr><tr><td>Dostawa: ${escapeHtml(getValue('deliveryMethod') || '—')}</td><td>${formatMoney(deliveryPrice)}</td></tr><tr class="total"><td>Razem</td><td>${formatMoney(total)}</td></tr>`;
+      buildMessage(products, productsTotal, deliveryPrice, total);
+    }
+    function buildMessage(products, productsTotal, deliveryPrice, total) {
+      const productLines = products.map(product => `- ${product.name || 'Produkt ' + product.index}\n  Ustalenia: ${product.details || '—'}\n  Ilość: ${product.qty} × ${formatMoney(product.price)} = ${formatMoney(product.total)}`).join('\n\n');
+      document.getElementById('messageOutput').value = `Dzień dobry 😊\n\nPrzesyłam podsumowanie ustaleń dotyczących zamówienia.\n\nDANE KLIENTA\nImię i nazwisko: ${getValue('clientName') || '—'}\nKontakt: ${getValue('clientContact') || '—'}\n\nDOSTAWA\nForma dostawy: ${getValue('deliveryMethod') || '—'}\nDane do wysyłki:\n${getValue('deliveryDetails') || '—'}\n\nPRODUKTY / USTALENIA\n${productLines || '—'}\n\nPŁATNOŚĆ\nProdukty: ${formatMoney(productsTotal)}\nDostawa: ${formatMoney(deliveryPrice)}\nRazem: ${formatMoney(total)}\nStatus płatności: ${getValue('paymentStatus') || '—'}\n\n${getValue('paymentText') || '—'}\n\nCZAS REALIZACJI\n${getValue('leadTime') || '—'}\n\nINFORMACJA O RĘKODZIELE\n${getValue('handmadeText') || '—'}\n\nDziękuję za zamówienie ❤️`;
+    }
+    function copyMessage() { const output = document.getElementById('messageOutput'); output.select(); document.execCommand('copy'); }
+    fields.forEach(id => { const el = document.getElementById(id); if (el) { el.addEventListener('input', updatePreview); el.addEventListener('change', updatePreview); } });
+    document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+    addProduct({ name: 'Ramka z aniołkiem', details: 'Opis produktu, personalizacja, kolorystyka, dedykacja i inne ustalenia z klientem.', qty: 1, price: 89 });
+    updatePreview();
+  </script>
+</body>
+</html>
