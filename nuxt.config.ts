@@ -46,7 +46,7 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
   ],
 
-  css: ['~/assets/css/main.css'],
+  css: ['primeicons/primeicons.css', '~/assets/css/main.css'],
 
   vite: {},
 
@@ -55,7 +55,7 @@ export default defineNuxtConfig({
       theme: {
         preset: NitkoTheme,
         options: {
-          darkModeSelector: '.dark',
+          darkModeSelector: false,
         },
       },
     },

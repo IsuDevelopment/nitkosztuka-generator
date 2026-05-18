@@ -8,7 +8,8 @@
     "taxRates": "Stawki podatkowe",
     "users": "Użytkownicy",
     "audit": "Dziennik zmian",
-    "settings": "Ustawienia"
+    "settings": "Ustawienia",
+    "profile": "Mój profil"
   },
   "action": {
     "add": "Dodaj",
@@ -17,6 +18,8 @@
     "addProduct": "Dodaj produkt",
     "newOrder": "Nowe zamówienie",
     "edit": "Edytuj",
+    "editOrder": "Edytuj zamówienie",
+    "saveOrder": "Zapisz zamówienie",
     "save": "Zapisz",
     "cancel": "Anuluj",
     "delete": "Usuń",
@@ -25,7 +28,11 @@
     "search": "Szukaj...",
     "createOrder": "Utwórz zamówienie",
     "enableShare": "Włącz link",
-    "disableShare": "Wyłącz link"
+    "disableShare": "Wyłącz link",
+    "clientLink": "Skopiuj link dla klienta",
+    "changePassword": "Zmień hasło",
+    "logout": "Wyloguj",
+    "actions": "Akcje"
   },
   "field": {
     "name": "Nazwa",
@@ -53,9 +60,9 @@
     "admin": "Administrator",
     "createdAt": "Data dodania",
     "orderNumber": "Numer zamówienia",
-    "acceptanceStatus": "Status akceptacji",
-    "paymentStatus": "Status płatności",
-    "deliveryStatus": "Status dostawy",
+    "acceptanceStatus": "Akceptacja",
+    "paymentStatus": "Płatność",
+    "deliveryStatus": "Status",
     "deliveryMethod": "Metoda dostawy",
     "deliveryDetails": "Dane do wysyłki",
     "deliveryCost": "Koszt dostawy",
@@ -78,9 +85,14 @@
     "entityId": "ID",
     "action": "Akcja",
     "user": "Użytkownik",
-    "createdBy": "Dodane przez"
+    "createdBy": "Dodane przez",
+    "currentPassword": "Aktualne hasło",
+    "newPassword": "Nowe hasło",
+    "confirmPassword": "Potwierdź nowe hasło"
   },
   "section": {
+    "accountInfo": "Informacje o koncie",
+    "changePassword": "Zmiana hasła",
     "clientInfo": "Dane klienta",
     "orderHistory": "Historia zamówień",
     "delivery": "Dostawa",
@@ -89,7 +101,8 @@
     "tax": "Podatek",
     "payment": "Płatność",
     "internalNotes": "Notatki wewnętrzne",
-    "copyMessage": "Wersja do skopiowania"
+    "copyMessage": "Wersja do skopiowania",
+    "financials": "Finansowe (wewnętrzne)"
   },
   "placeholder": {
     "deliveryDetails": "np. paczkomat, adres, kod pocztowy, miejscowość",
@@ -105,6 +118,7 @@
     "totalOrders": "Liczba zamówień",
     "revenue": "Przychód",
     "materialCost": "Koszt materiałów",
+    "grossProfit": "Zysk brutto",
     "netProfit": "Zysk netto",
     "tax": "Podatek",
     "profitAfterTax": "Zysk po podatku",
@@ -112,6 +126,18 @@
     "monthlyChart": "Przychód i zysk miesięcznie"
   },
   "info": {
-    "shareDisabled": "Link jest wyłączony — klient nie może wyświetlić podglądu."
+    "shareDisabled": "Link jest wyłączony — klient nie może wyświetlić podglądu.",
+    "passwordChanged": "Hasło zostało zmienione",
+    "passwordMinLength": "Minimum 8 znaków",
+    "yes": "Tak",
+    "no": "Nie",
+    "confirmDeleteClient": "Czy na pewno chcesz usunąć klienta",
+    "clientDeleted": "Klient został usunięty",
+    "ordersTotal": "łącznie",
+    "ordersInProgress": "w toku"
+  },
+  "error": {
+    "passwordMismatch": "Nowe hasło i potwierdzenie nie są zgodne",
+    "generic": "Wystąpił błąd, spróbuj ponownie"
   }
 }

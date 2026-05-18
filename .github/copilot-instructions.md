@@ -42,6 +42,23 @@ Full-stack admin panel for a handcraft business. Manages brands, clients, orders
 └── nuxt.config.ts                # Module config, PrimeVue theme, i18n, nitro
 ```
 
+## CRITICAL — Maintaining Agent Instructions
+
+**Every new feature or significant change MUST be reflected in the instruction/skill files before the task is considered complete.**
+
+Rules:
+- New module → create `.github/instructions/{module}.instructions.md` AND update `.github/skills/add-module/SKILL.md` checklist if the pattern differs.
+- New API endpoint pattern → update `.github/instructions/api.instructions.md`.
+- New schema field/model → update `.github/instructions/database.instructions.md`; if Order-related, update `.github/skills/modify-order-schema/SKILL.md`.
+- New frontend pattern (component, layout, composable) → update `.github/instructions/frontend.instructions.md`.
+- New auth rule or public route → update `.github/instructions/auth.instructions.md`.
+- New reusable multi-step workflow → create `.github/skills/{skill-name}/SKILL.md`.
+- Change to an existing critical invariant (snapshot, audit, FK policy) → update both `copilot-instructions.md` AND the relevant module instruction file.
+
+**Failure to update docs means the next agent session will repeat the same mistakes.**
+
+---
+
 ## Critical Invariants
 1. **Snapshot-on-create for orders** — `deliveryMethodName`, `deliveryCost`, `paymentText`, `handmadeText`, `leadTime` are copied into the Order row at creation. Changes to DeliveryMethod or Brand defaults MUST NOT retroactively affect existing orders.
 2. **`materialCost` is internal** — never exposed in public share views or client-facing components.

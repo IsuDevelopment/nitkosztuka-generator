@@ -44,6 +44,16 @@
       <Column :header="$t('field.deliveryStatus')" style="width: 130px">
         <template #body="{ data }"><OrderStatusBadge type="delivery" :value="data.deliveryStatus" /></template>
       </Column>
+      <Column :header="$t('stats.revenue')" style="width: 110px; text-align: right">
+        <template #body="{ data }">
+          <span class="profit-pos">{{ fmtMoney(data.revenue) }}</span>
+        </template>
+      </Column>
+      <Column :header="$t('stats.netProfit')" style="width: 110px; text-align: right">
+        <template #body="{ data }">
+          <span :class="data.netProfit >= 0 ? 'profit-pos' : 'profit-neg'">{{ fmtMoney(data.netProfit) }}</span>
+        </template>
+      </Column>
       <Column style="width: 50px">
         <template #body="{ data }">
           <Button icon="pi pi-angle-right" text rounded size="small" @click.stop="router.push(`/orders/${data.id}`)" />
@@ -92,6 +102,7 @@ const paymentOptions = [
 ]
 const deliveryOptions = [
   { label: 'Oczekuje', value: 'PENDING' },
+  { label: 'W trakcie', value: 'IN_PRODUCTION' },
   { label: 'W dostawie', value: 'IN_DELIVERY' },
   { label: 'Dostarczone', value: 'DELIVERED' },
   { label: 'Zakończone', value: 'COMPLETED' },
@@ -100,6 +111,10 @@ const deliveryOptions = [
 function formatDate(d: unknown) {
   if (!d) return '—'
   return new Date(d as string).toLocaleDateString('pl-PL')
+}
+
+function fmtMoney(v: number) {
+  return Number(v).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' zł'
 }
 
 let debounceTimer: ReturnType<typeof setTimeout>
@@ -120,5 +135,19 @@ function onPage(e: { page: number }) {
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.profit-pos { color: #2e7d32; font-weight: 600; }
+.profit-neg { color: #c62828; font-weight: 600; }
+
+:deep(.p-datatable) {
+  font-size: 12px;
+}
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  font-size: 11px;
+  padding: 8px 10px;
+}
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+  padding: 6px 10px;
 }
 </style>

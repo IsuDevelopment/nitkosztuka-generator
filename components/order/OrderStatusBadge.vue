@@ -17,6 +17,7 @@ const configs: Record<string, Record<string, { label: string; severity: string }
   },
   delivery: {
     PENDING: { label: 'Oczekuje', severity: 'secondary' },
+    IN_PRODUCTION: { label: 'W trakcie', severity: 'warn' },
     IN_DELIVERY: { label: 'W dostawie', severity: 'info' },
     DELIVERED: { label: 'Dostarczone', severity: 'success' },
     COMPLETED: { label: 'Zakończone', severity: 'contrast' },

@@ -19,7 +19,9 @@ No JWT, no external provider. Password-based login only.
 | `server/api/auth/login.post.ts` | Validates login+password, creates session |
 | `server/api/auth/logout.post.ts` | Clears session |
 | `server/api/auth/me.get.ts` | Returns current user from session |
+| `server/api/auth/change-password.post.ts` | Verifies current password, hashes and saves new password |
 | `middleware/auth.global.ts` | Client-side: redirects to `/login` if no session |
+| `pages/profile.vue` | Logged-in user profile: account info + change password form |
 
 ### Public Routes (no auth required)
 - `POST /api/auth/login`

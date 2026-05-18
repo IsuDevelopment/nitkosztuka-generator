@@ -44,10 +44,24 @@ export default defineEventHandler(async (event) => {
         brand: { select: { id: true, name: true } },
         client: { select: { id: true, firstName: true, lastName: true } },
         _count: { select: { items: true } },
+        items: { select: { unitPrice: true, materialCost: true, quantity: true } },
       },
     }),
     prisma.order.count({ where }),
   ])
 
-  return { orders, total, page: Number(page), limit: take }
+  const ordersWithFinancials = orders.map((o) => {
+    const itemsTotal = o.items.reduce((s, i) => s + Number(i.unitPrice) * i.quantity, 0)
+    const materialCost = o.items.reduce((s, i) => s + Number(i.materialCost ?? 0) * i.quantity, 0)
+    const deliveryCost = Number(o.deliveryCost ?? 0)
+    const discount = Number(o.discount ?? 0)
+    const tax = Number(o.taxAmount ?? 0)
+    const revenue = itemsTotal + deliveryCost - discount
+    const grossProfit = revenue - materialCost - deliveryCost
+    const netProfit = grossProfit - tax
+    const { items: _items, ...rest } = o
+    return { ...rest, revenue, grossProfit, netProfit }
+  })
+
+  return { orders: ordersWithFinancials, total, page: Number(page), limit: take }
 })

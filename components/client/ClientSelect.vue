@@ -80,9 +80,19 @@ function onNewClientSaved(client: { id?: string; firstName?: string; lastName?: 
 }
 
 // Sync external value reset
-watch(() => props.modelValue, (v) => {
-  if (!v) selectedClient.value = null
-})
+watch(() => props.modelValue, async (v) => {
+  if (!v) {
+    selectedClient.value = null
+    return
+  }
+  // Load client data if not already set (e.g. edit mode pre-fill)
+  if (!selectedClient.value || selectedClient.value.id !== v) {
+    const client = await $fetch<ClientOption>(`/api/clients/${v}`)
+    if (client) {
+      selectedClient.value = { ...client, fullName: `${client.lastName} ${client.firstName}` }
+    }
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>

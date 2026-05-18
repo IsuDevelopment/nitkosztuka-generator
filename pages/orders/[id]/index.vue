@@ -5,14 +5,16 @@
         <Button icon="pi pi-arrow-left" text @click="router.back()" />
         <div>
           <h1>{{ order.orderNumber }}</h1>
-          <div class="flex gap-2 mt-1">
+          <div class="flex gap-3 mt-2">
             <OrderStatusBadge type="acceptance" :value="(order.acceptanceStatus as string)" />
             <OrderStatusBadge type="payment" :value="(order.paymentStatus as string)" />
             <OrderStatusBadge type="delivery" :value="(order.deliveryStatus as string)" />
           </div>
         </div>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-3">
+        <Button v-if="order.shareEnabled" icon="pi pi-copy" :label="$t('action.clientLink')" outlined @click="copyShare" />
+        <Button v-if="order.deliveryStatus === 'PENDING'" icon="pi pi-pencil" :label="$t('action.editOrder')" outlined @click="router.push(`/orders/${route.params.id}/edit`)" />
         <Button icon="pi pi-share-alt" :label="order.shareEnabled ? $t('action.disableShare') : $t('action.enableShare')" :severity="order.shareEnabled ? 'warn' : 'success'" outlined @click="toggleShare" />
         <Button icon="pi pi-print" :label="$t('action.print')" outlined @click="printPage()" />
         <Button icon="pi pi-trash" :label="$t('action.delete')" severity="danger" outlined @click="confirmDelete" />
@@ -51,6 +53,40 @@
         <div class="status-section">
           <div class="label">{{ $t('field.internalNotes') }}</div>
           <Textarea v-model="notesForm.notes" class="w-full" rows="3" @blur="saveNotes" />
+        </div>
+
+        <Divider />
+
+        <div v-if="orderFinancials" class="status-section financials-panel">
+          <div class="label">{{ $t('section.financials') }}</div>
+          <table class="fin-table">
+            <tr>
+              <td>{{ $t('stats.revenue') }}</td>
+              <td class="fin-val">{{ fmtMoney(orderFinancials.revenue) }}</td>
+            </tr>
+            <tr class="fin-cost">
+              <td>{{ $t('stats.materialCost') }}</td>
+              <td class="fin-val">− {{ fmtMoney(orderFinancials.materialCost) }}</td>
+            </tr>
+            <tr class="fin-cost">
+              <td>{{ $t('field.deliveryCost') }}</td>
+              <td class="fin-val">− {{ fmtMoney(orderFinancials.deliveryCost) }}</td>
+            </tr>
+            <tr class="fin-divider"><td colspan="2"></td></tr>
+            <tr class="fin-profit">
+              <td>{{ $t('stats.grossProfit') }}</td>
+              <td class="fin-val">{{ fmtMoney(orderFinancials.grossProfit) }}</td>
+            </tr>
+            <tr class="fin-cost">
+              <td>{{ $t('stats.tax') }}</td>
+              <td class="fin-val">− {{ fmtMoney(orderFinancials.tax) }}</td>
+            </tr>
+            <tr class="fin-divider"><td colspan="2"></td></tr>
+            <tr class="fin-net">
+              <td>{{ $t('stats.netProfit') }}</td>
+              <td class="fin-val">{{ fmtMoney(orderFinancials.netProfit) }}</td>
+            </tr>
+          </table>
         </div>
 
         <Divider />
@@ -114,6 +150,21 @@ const shareUrl = computed(() => {
   return `${globalThis.location.origin}/share/${hash}`
 })
 
+const orderFinancials = computed(() => {
+  if (!order.value) return null
+  const o = order.value
+  const items = (o.items as Record<string, unknown>[] ?? [])
+  const itemsTotal = items.reduce((s, i) => s + Number(i.unitPrice) * Number(i.quantity), 0)
+  const materialCost = items.reduce((s, i) => s + Number(i.materialCost ?? 0) * Number(i.quantity), 0)
+  const deliveryCost = Number(o.deliveryCost ?? 0)
+  const discount = Number(o.discount ?? 0)
+  const tax = Number(o.taxAmount ?? 0)
+  const revenue = itemsTotal + deliveryCost - discount
+  const grossProfit = revenue - materialCost - deliveryCost
+  const netProfit = grossProfit - tax
+  return { itemsTotal, materialCost, deliveryCost, discount, tax, revenue, grossProfit, netProfit }
+})
+
 const messageText = computed(() => {
   if (!order.value) return ''
   const o = order.value
@@ -165,6 +216,10 @@ function formatDate(d: unknown) {
   return new Date(d as string).toLocaleDateString('pl-PL')
 }
 
+function fmtMoney(v: number) {
+  return Number(v).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' zł'
+}
+
 function confirmDelete() {
   confirm.require({
     header: 'Usuń zamówienie',
@@ -191,6 +246,7 @@ const paymentOptions = [
 ]
 const deliveryOptions = [
   { label: 'Oczekuje', value: 'PENDING' },
+  { label: 'W trakcie', value: 'IN_PRODUCTION' },
   { label: 'W dostawie', value: 'IN_DELIVERY' },
   { label: 'Dostarczone', value: 'DELIVERED' },
   { label: 'Zakończone', value: 'COMPLETED' },
@@ -252,6 +308,26 @@ function printPage() {
 }
 
 .copy-section h3 { margin: 0 0 12px; font-size: 14px; }
+
+/* Financial panel */
+.financials-panel .fin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.financials-panel .fin-table td {
+  padding: 3px 0;
+  vertical-align: top;
+}
+.financials-panel .fin-val {
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.fin-cost td { color: var(--muted); }
+.fin-divider td { border-top: 1px solid var(--line); padding-top: 4px; height: 6px; }
+.fin-profit td { color: var(--accent-dark); font-weight: 700; }
+.fin-net td { color: var(--success, #2e7d32); font-weight: 800; font-size: 13px; }
 
 @media (max-width: 900px) {
   .order-detail-layout {

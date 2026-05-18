@@ -10,7 +10,10 @@
           <Button icon="pi pi-arrow-left" text @click="router.back()" />
           <h1>{{ client.lastName }} {{ client.firstName }}</h1>
         </div>
-        <Button icon="pi pi-pencil" :label="$t('action.edit')" @click="openEditDialog" />
+        <div class="flex gap-2">
+          <Button icon="pi pi-pencil" :label="$t('action.edit')" outlined @click="openEditDialog" />
+          <Button v-if="user?.isAdmin" icon="pi pi-trash" :label="$t('action.delete')" severity="danger" outlined @click="confirmDelete" />
+        </div>
       </div>
 
       <div class="detail-grid">
@@ -42,6 +45,7 @@
     </template>
 
     <ClientFormDialog v-model:visible="editDialogVisible" :edit-client="(client as unknown as { id?: string; firstName?: string; lastName?: string; email?: string; phone?: string; defaultAddress?: string; notes?: string })" @saved="() => refresh()" />
+    <ConfirmDialog />
   </div>
 </template>
 
@@ -49,6 +53,9 @@
 const { t: $t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
+const confirm = useConfirm()
+const { user } = useUserSession()
 
 const { data: client, pending, refresh } = await useFetch(`/api/clients/${route.params.id}`)
 const editDialogVisible = ref(false)
@@ -60,5 +67,26 @@ function formatDate(d: unknown) {
 
 function openEditDialog() {
   editDialogVisible.value = true
+}
+
+function confirmDelete() {
+  const c = client.value as { firstName?: string; lastName?: string } | null
+  confirm.require({
+    header: $t('action.delete') + ' ' + $t('nav.clients').toLowerCase(),
+    message: `${$t('info.confirmDeleteClient')} ${c?.lastName} ${c?.firstName}?`,
+    acceptLabel: $t('action.delete'),
+    rejectLabel: $t('action.cancel'),
+    acceptClass: 'p-button-danger',
+    accept: async () => {
+      try {
+        await $fetch(`/api/clients/${route.params.id}`, { method: 'DELETE' })
+        toast.add({ severity: 'success', summary: $t('info.clientDeleted'), life: 3000 })
+        router.push('/clients')
+      } catch (e: unknown) {
+        const msg = (e as { data?: { message?: string } })?.data?.message ?? $t('error.generic')
+        toast.add({ severity: 'error', summary: msg, life: 5000 })
+      }
+    },
+  })
 }
 </script>

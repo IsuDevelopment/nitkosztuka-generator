@@ -56,8 +56,8 @@
         </button>
         <div class="topbar-spacer" />
         <div class="topbar-user">
-          <span class="topbar-user-name">{{ user?.name }}</span>
-          <Button icon="pi pi-sign-out" text rounded size="small" @click="logout" />
+          <NuxtLink to="/profile" class="topbar-user-name" :title="$t('nav.profile')">{{ user?.name }}</NuxtLink>
+          <Button icon="pi pi-sign-out" text rounded size="small" :title="$t('action.logout')" @click="logout" />
         </div>
       </header>
 
@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+const { t: $t } = useI18n()
 const { user, clear } = useUserSession()
 const sidebarCollapsed = ref(false)
 const router = useRouter()
@@ -225,6 +226,15 @@ async function logout() {
   font-size: 13px;
   font-weight: 700;
   color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.topbar-user-name:hover {
+  background: var(--line);
 }
 
 .page-content {

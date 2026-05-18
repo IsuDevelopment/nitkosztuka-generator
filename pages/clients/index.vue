@@ -16,7 +16,7 @@
       :value="clients"
       :loading="pending"
       striped-rows
-      class="p-datatable-sm"
+      class="p-datatable-sm clients-table"
       @row-click="e => router.push(`/clients/${e.data.id}`)"
       row-hover
     >
@@ -25,12 +25,20 @@
       </Column>
       <Column field="email" :header="$t('field.email')" />
       <Column field="phone" :header="$t('field.phone')" />
-      <Column :header="$t('field.orders')">
-        <template #body="{ data }">{{ data._count?.orders ?? 0 }}</template>
-      </Column>
-      <Column style="width: 60px">
+      <Column :header="$t('field.orders')" style="width: 140px">
         <template #body="{ data }">
-          <Button icon="pi pi-angle-right" text rounded size="small" @click.stop="router.push(`/clients/${data.id}`)" />
+          <div class="orders-counts">
+            <span class="orders-total">{{ data._count?.orders ?? 0 }} {{ $t('info.ordersTotal') }}</span>
+            <span v-if="data.pendingOrdersCount > 0" class="orders-pending">{{ data.pendingOrdersCount }} {{ $t('info.ordersInProgress') }}</span>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 100px">
+        <template #body="{ data }">
+          <div class="flex gap-1">
+            <Button icon="pi pi-pencil" text rounded size="small" @click.stop="openDialog(data)" />
+            <Button icon="pi pi-angle-right" text rounded size="small" @click.stop="router.push(`/clients/${data.id}`)" />
+          </div>
         </template>
       </Column>
     </DataTable>
@@ -41,7 +49,7 @@
       @page="onPage"
     />
 
-    <ClientFormDialog v-model:visible="dialogVisible" @saved="() => refresh()" />
+    <ClientFormDialog v-model:visible="dialogVisible" :edit-client="editingClient" @saved="onSaved" />
   </div>
 </template>
 
@@ -59,6 +67,7 @@ const clients = computed(() => (data.value as { clients: unknown[] } | null)?.cl
 const total = computed(() => (data.value as { total: number } | null)?.total ?? 0)
 
 const dialogVisible = ref(false)
+const editingClient = ref<{ id?: string; firstName?: string; lastName?: string; email?: string; phone?: string; defaultAddress?: string; notes?: string } | null>(null)
 
 let debounceTimer: ReturnType<typeof setTimeout>
 function debouncedFetch() {
@@ -71,7 +80,44 @@ function onPage(e: { page: number }) {
   refresh()
 }
 
-function openDialog() {
+function openDialog(client?: Record<string, unknown>) {
+  editingClient.value = client ?? null
   dialogVisible.value = true
 }
+
+function onSaved() {
+  refresh()
+}
 </script>
+
+<style scoped>
+.search-bar {
+  margin-bottom: 16px;
+}
+
+:deep(.clients-table .p-datatable-tbody > tr) {
+  cursor: pointer;
+}
+
+:deep(.clients-table .p-datatable-tbody > tr:hover td) {
+  background: var(--soft) !important;
+}
+
+.orders-counts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.3;
+}
+
+.orders-total {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.orders-pending {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+</style>

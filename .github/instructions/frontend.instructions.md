@@ -51,7 +51,7 @@ Preferred components (auto-imported via `@primevue/nuxt-module`):
 - Form: `InputText`, `InputNumber`, `Textarea`, `Select`, `AutoComplete`, `DatePicker`, `Checkbox`
 - Actions: `Button`, `Dialog`, `ConfirmDialog`
 - Feedback: `Toast` (via `useToast()`)
-- Charts: `Chart` (Chart.js wrapper)
+- Charts: `Chart` (Chart.js wrapper, requires `chart.js` peer dependency — must be installed separately: `npm install chart.js`)
 
 ### Data Fetching
 ```ts

@@ -3,7 +3,10 @@
     <!-- Form panel -->
     <section class="order-panel no-print">
       <div class="page-header">
-        <h1>{{ $t('action.newOrder') }}</h1>
+        <div class="flex items-center gap-3">
+          <Button icon="pi pi-arrow-left" text @click="router.back()" />
+          <h1>{{ $t('action.editOrder') }} · {{ order?.orderNumber }}</h1>
+        </div>
       </div>
 
       <form @submit.prevent="submitOrder">
@@ -121,7 +124,10 @@
           <Textarea v-model="form.notes" class="w-full" rows="2" :placeholder="$t('placeholder.internalNotes')" />
         </div>
 
-        <Button type="submit" :label="$t('action.createOrder')" class="w-full mt-4" :loading="saving" />
+        <div class="flex gap-3 mt-4">
+          <Button type="button" :label="$t('action.cancel')" outlined class="flex-1" @click="router.back()" />
+          <Button type="submit" :label="$t('action.saveOrder')" class="flex-1" :loading="saving" />
+        </div>
       </form>
     </section>
 
@@ -136,9 +142,13 @@
 
 <script setup lang="ts">
 const { t: $t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
+const id = route.params.id as string
+
+const { data: order } = await useFetch<Record<string, unknown>>(`/api/orders/${id}`)
 const { data: brandsData } = await useFetch('/api/brands')
 const { data: taxRatesData } = await useFetch('/api/tax-rates')
 
@@ -150,20 +160,22 @@ const selectedBrand = ref<Record<string, unknown> | null>(null)
 const selectedClient = ref<Record<string, unknown> | null>(null)
 
 interface ItemForm {
+  id?: string
   name: string
   details: string
   quantity: number
   unitPrice: number
   materialCost: number
+  sortOrder?: number
 }
 
 const form = reactive({
-  brandId: brands.value[0]?.id ?? '',
+  brandId: '',
   clientId: null as string | null,
   deliveryMethodId: null as string | null,
   deliveryDetails: '',
   deliveryCost: 0,
-  leadTime: '7–10 dni roboczych',
+  leadTime: '',
   discount: 0,
   discountNote: '',
   taxRateId: null as string | null,
@@ -173,15 +185,48 @@ const form = reactive({
   items: [] as ItemForm[],
 })
 
-// Populate defaults when brand changes
+// Pre-fill form from existing order
+if (order.value) {
+  const o = order.value
+  form.brandId = o.brandId as string
+  form.clientId = o.clientId as string
+  form.deliveryMethodId = (o.deliveryMethodId as string | null) ?? null
+  form.deliveryDetails = (o.deliveryDetails as string) ?? ''
+  form.deliveryCost = Number(o.deliveryCost ?? 0)
+  form.leadTime = (o.leadTime as string) ?? ''
+  form.discount = Number(o.discount ?? 0)
+  form.discountNote = (o.discountNote as string) ?? ''
+  form.taxRateId = (o.taxRateId as string | null) ?? null
+  form.paymentText = (o.paymentText as string) ?? ''
+  form.handmadeText = (o.handmadeText as string) ?? ''
+  form.notes = (o.notes as string) ?? ''
+  form.items = (o.items as ItemForm[] ?? []).map(i => ({
+    id: i.id,
+    name: i.name,
+    details: (i.details as string) ?? '',
+    quantity: Number(i.quantity),
+    unitPrice: Number(i.unitPrice),
+    materialCost: Number(i.materialCost ?? 0),
+    sortOrder: i.sortOrder,
+  }))
+  selectedBrand.value = o.brand as Record<string, unknown> | null
+  selectedClient.value = o.client as Record<string, unknown> | null
+}
+
+// Load delivery methods for current brand
+onMounted(async () => {
+  if (form.brandId) {
+    const methods = await $fetch<typeof deliveryMethods.value>('/api/delivery-methods', {
+      query: { brandId: form.brandId, activeOnly: 'true' },
+    })
+    deliveryMethods.value = methods
+  }
+})
+
 async function onBrandChange() {
   const brand = brands.value.find(b => b.id === form.brandId) as Record<string, string> | undefined
   if (!brand) return
   selectedBrand.value = brand as Record<string, unknown>
-  form.leadTime = (brand.defaultLeadTime as string) || '7–10 dni roboczych'
-  form.paymentText = (brand.defaultPaymentText as string) || ''
-  form.handmadeText = (brand.defaultHandmadeText as string) || ''
-
   const methods = await $fetch<typeof deliveryMethods.value>('/api/delivery-methods', {
     query: { brandId: form.brandId, activeOnly: 'true' },
   })
@@ -195,9 +240,6 @@ function onDeliveryMethodChange() {
 
 function onClientSelected(client: { id?: string; firstName?: string; lastName?: string; fullName?: string; email?: string; phone?: string; defaultAddress?: string }) {
   selectedClient.value = client as Record<string, unknown>
-  if (client.defaultAddress && !form.deliveryDetails) {
-    form.deliveryDetails = client.defaultAddress
-  }
 }
 
 function addItem() {
@@ -212,13 +254,12 @@ function formatMoney(v: number) {
   return Number(v).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' zł'
 }
 
-// Preview data derived from form
 const previewOrder = computed(() => ({
-  orderNumber: 'PODGLĄD',
-  createdAt: new Date().toISOString(),
-  brand: selectedBrand.value ?? brands.value.find(b => b.id === form.brandId),
-  client: selectedClient.value ?? undefined,
-  deliveryMethod: deliveryMethods.value.find(m => m.id === form.deliveryMethodId),
+  orderNumber: (order.value?.orderNumber as string) ?? 'PODGLĄD',
+  createdAt: (order.value?.createdAt as string) ?? new Date().toISOString(),
+  brand: (selectedBrand.value ?? brands.value.find(b => b.id === form.brandId)) as { name?: string; subtitle?: string } | undefined,
+  client: selectedClient.value as { firstName?: string; lastName?: string; email?: string; phone?: string } | null | undefined,
+  deliveryMethod: deliveryMethods.value.find(m => m.id === form.deliveryMethodId) as { name?: string } | undefined,
   deliveryMethodName: deliveryMethods.value.find(m => m.id === form.deliveryMethodId)?.name ?? '',
   deliveryDetails: form.deliveryDetails,
   deliveryCost: form.deliveryCost,
@@ -227,8 +268,8 @@ const previewOrder = computed(() => ({
   leadTime: form.leadTime,
   paymentText: form.paymentText,
   handmadeText: form.handmadeText,
-  paymentStatus: 'PENDING',
-  items: form.items.map((item, idx) => ({ id: String(idx), ...item })),
+  paymentStatus: (order.value?.paymentStatus as string) ?? 'PENDING',
+  items: form.items.map((item, idx) => ({ id: item.id ?? String(idx), name: item.name, details: item.details, quantity: item.quantity, unitPrice: item.unitPrice, materialCost: item.materialCost })),
 }))
 
 const saving = ref(false)
@@ -245,9 +286,9 @@ async function submitOrder() {
 
   saving.value = true
   try {
-    const order = await $fetch<{ id: string }>('/api/orders', { method: 'POST', body: toRaw(form) })
-    toast.add({ severity: 'success', summary: 'Zamówienie utworzone', life: 3000 })
-    router.push(`/orders/${order.id}`)
+    await $fetch(`/api/orders/${id}`, { method: 'PUT', body: toRaw(form) })
+    toast.add({ severity: 'success', summary: 'Zamówienie zapisane', life: 3000 })
+    router.push(`/orders/${id}`)
   } catch (err: unknown) {
     const e = err as { data?: { message?: string } }
     toast.add({ severity: 'error', summary: e?.data?.message ?? 'Błąd', life: 4000 })
@@ -255,12 +296,6 @@ async function submitOrder() {
     saving.value = false
   }
 }
-
-// Init: load brand defaults on mount
-onMounted(async () => {
-  if (form.brandId) await onBrandChange()
-  addItem()
-})
 </script>
 
 <style scoped>

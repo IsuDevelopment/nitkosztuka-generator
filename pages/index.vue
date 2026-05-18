@@ -64,6 +64,7 @@
           <h3>{{ $t('field.deliveryStatus') }}</h3>
           <div class="status-counts">
             <div>Oczekuje: <strong>{{ stats.statusCounts.delivery.PENDING }}</strong></div>
+            <div>W trakcie: <strong>{{ stats.statusCounts.delivery.IN_PRODUCTION }}</strong></div>
             <div>W dostawie: <strong>{{ stats.statusCounts.delivery.IN_DELIVERY }}</strong></div>
             <div>Dostarczone: <strong>{{ stats.statusCounts.delivery.DELIVERED }}</strong></div>
             <div>Zakończone: <strong>{{ stats.statusCounts.delivery.COMPLETED }}</strong></div>
@@ -92,7 +93,7 @@ interface Stats {
   statusCounts: {
     acceptance: { PENDING: number; ACCEPTED: number }
     payment: { PENDING: number; DEPOSIT_PAID: number; PAID: number }
-    delivery: { PENDING: number; IN_DELIVERY: number; DELIVERED: number; COMPLETED: number }
+    delivery: { PENDING: number; IN_PRODUCTION: number; IN_DELIVERY: number; DELIVERED: number; COMPLETED: number }
   }
   byMonth: { month: string; revenue: number; profit: number; orders: number }[]
 }

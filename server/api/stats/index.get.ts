@@ -40,7 +40,8 @@ export default defineEventHandler(async (event) => {
     const materialsTotal = order.items.reduce((s, i) => s + Number(i.materialCost) * i.quantity, 0)
     const revenue = itemsTotal - Number(order.discount) + Number(order.deliveryCost)
     const tax = Number(order.taxAmount)
-    const profit = revenue - materialsTotal
+    // Gross profit = revenue - material costs - delivery cost (delivery is a passthrough cost)
+    const profit = revenue - materialsTotal - Number(order.deliveryCost)
 
     totalRevenue += revenue
     totalMaterialCost += materialsTotal
@@ -53,7 +54,8 @@ export default defineEventHandler(async (event) => {
     byMonth[monthKey].orders += 1
   }
 
-  const totalNetProfit = totalRevenue - totalMaterialCost
+  const totalDeliveryCost = orders.reduce((s, o) => s + Number(o.deliveryCost), 0)
+  const totalNetProfit = totalRevenue - totalMaterialCost - totalDeliveryCost
   const totalProfitAfterTax = totalNetProfit - totalTax
 
   const statusCounts = {
@@ -68,6 +70,7 @@ export default defineEventHandler(async (event) => {
     },
     delivery: {
       PENDING: orders.filter(o => o.deliveryStatus === 'PENDING').length,
+      IN_PRODUCTION: orders.filter(o => o.deliveryStatus === 'IN_PRODUCTION').length,
       IN_DELIVERY: orders.filter(o => o.deliveryStatus === 'IN_DELIVERY').length,
       DELIVERED: orders.filter(o => o.deliveryStatus === 'DELIVERED').length,
       COMPLETED: orders.filter(o => o.deliveryStatus === 'COMPLETED').length,
