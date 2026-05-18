@@ -2,14 +2,17 @@ import { defineEventHandler, getQuery } from 'h3'
 import { prisma } from '~/server/utils/db'
 
 export default defineEventHandler(async (event) => {
-  const { from, to } = getQuery(event)
+  const { from, to, brandId } = getQuery(event)
 
   const fromDate = from ? new Date(String(from)) : new Date(new Date().getFullYear(), 0, 1)
   const toDate = to ? new Date(String(to)) : new Date()
   toDate.setHours(23, 59, 59, 999)
 
+  const where: Record<string, unknown> = { createdAt: { gte: fromDate, lte: toDate } }
+  if (brandId) where.brandId = String(brandId)
+
   const orders = await prisma.order.findMany({
-    where: { createdAt: { gte: fromDate, lte: toDate } },
+    where,
     select: {
       id: true,
       createdAt: true,

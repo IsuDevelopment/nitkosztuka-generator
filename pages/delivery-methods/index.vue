@@ -21,6 +21,7 @@
       <Column :header="$t('action.actions')" style="width: 100px">
         <template #body="{ data }">
           <Button icon="pi pi-pencil" text rounded size="small" @click="openDialog(data)" />
+          <Button icon="pi pi-trash" text rounded size="small" severity="danger" @click="deleteMethod(data)" />
         </template>
       </Column>
     </DataTable>
@@ -49,7 +50,7 @@
         </div>
         <div class="dialog-footer">
           <Button type="button" :label="$t('action.cancel')" severity="secondary" text @click="dialogVisible = false" />
-          <Button type="submit" :label="$t('action.save')" :loading="saving" />
+          <Button type="submit" :label="$t('action.save')" :loading="saving" :disabled="saving" />
         </div>
       </form>
     </Dialog>
@@ -100,6 +101,7 @@ function openDialog(item?: Record<string, unknown>) {
 }
 
 async function save() {
+  if (saving.value) return
   saving.value = true
   try {
     if (editItem.value) {
@@ -107,7 +109,7 @@ async function save() {
     } else {
       await $fetch('/api/delivery-methods', { method: 'POST', body: form })
     }
-    useToast().add({ severity: 'success', summary: 'Zapisano', life: 3000 })
+    toast.add({ severity: 'success', summary: 'Zapisano', life: 3000 })
     dialogVisible.value = false
     refresh()
   } catch (err: unknown) {
@@ -115,6 +117,17 @@ async function save() {
     toast.add({ severity: 'error', summary: e?.data?.message ?? 'Błąd', life: 4000 })
   } finally {
     saving.value = false
+  }
+}
+async function deleteMethod(item: Record<string, unknown>) {
+  if (!confirm(`Usunąć metodę dostawy "${item.name}"?`)) return
+  try {
+    await $fetch(`/api/delivery-methods/${item.id}`, { method: 'DELETE' })
+    toast.add({ severity: 'success', summary: 'Usunięto', life: 3000 })
+    refresh()
+  } catch (err: unknown) {
+    const e = err as { data?: { message?: string } }
+    toast.add({ severity: 'error', summary: e?.data?.message ?? 'Błąd', life: 4000 })
   }
 }
 </script>

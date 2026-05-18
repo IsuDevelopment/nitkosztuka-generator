@@ -3,6 +3,7 @@
     <div class="page-header">
       <h1>{{ $t('nav.dashboard') }}</h1>
       <div class="date-range-controls no-print">
+        <Select v-model="selectedBrandId" :options="brandOptions" option-label="label" option-value="value" :placeholder="$t('field.brand')" show-clear @change="() => refresh()" />
         <Select v-model="quickRange" :options="quickRanges" option-label="label" option-value="value" @change="applyQuickRange" />
         <DatePicker v-model="dateRange" selection-mode="range" date-format="dd.mm.yy" :show-icon="true" @hide="onDateRangeChange" />
       </div>
@@ -127,8 +128,16 @@ function applyQuickRange() {
 const fromParam = computed(() => dateRange.value[0]?.toISOString().slice(0, 10))
 const toParam = computed(() => dateRange.value[1]?.toISOString().slice(0, 10))
 
+const selectedBrandId = ref<string | null>(null)
+const { data: brandsData } = await useFetch<{ id: string; name: string }[]>('/api/brands')
+const brandOptions = computed(() => (brandsData.value ?? []).map(b => ({ label: b.name, value: b.id })))
+
 const { data: stats, pending, refresh } = await useFetch<Stats>('/api/stats', {
-  query: computed(() => ({ from: fromParam.value, to: toParam.value })),
+  query: computed(() => ({
+    from: fromParam.value,
+    to: toParam.value,
+    brandId: selectedBrandId.value || undefined,
+  })),
 })
 
 function onDateRangeChange() {

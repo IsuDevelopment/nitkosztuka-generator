@@ -12,6 +12,7 @@
         <InputIcon class="pi pi-search" />
         <InputText v-model="filters.search" :placeholder="$t('action.search')" @input="debouncedFetch" />
       </IconField>
+      <Select v-model="filters.brandId" :options="brandOptions" option-label="label" option-value="value" :placeholder="$t('field.brand')" show-clear @change="() => fetch()" />
       <Select v-model="filters.acceptanceStatus" :options="acceptanceOptions" option-label="label" option-value="value" :placeholder="$t('field.acceptanceStatus')" show-clear @change="() => fetch()" />
       <Select v-model="filters.paymentStatus" :options="paymentOptions" option-label="label" option-value="value" :placeholder="$t('field.paymentStatus')" show-clear @change="() => fetch()" />
       <Select v-model="filters.deliveryStatus" :options="deliveryOptions" option-label="label" option-value="value" :placeholder="$t('field.deliveryStatus')" show-clear @change="() => fetch()" />
@@ -69,8 +70,12 @@
 const { t: $t } = useI18n()
 const router = useRouter()
 
+const { data: brandsData } = await useFetch<{ id: string; name: string }[]>('/api/brands')
+const brandOptions = computed(() => (brandsData.value ?? []).map(b => ({ label: b.name, value: b.id })))
+
 const filters = reactive({
   search: '',
+  brandId: null as string | null,
   acceptanceStatus: null as string | null,
   paymentStatus: null as string | null,
   deliveryStatus: null as string | null,
@@ -82,6 +87,7 @@ const { data, pending, refresh: fetch } = await useFetch('/api/orders', {
     page: page.value,
     limit: 25,
     search: filters.search || undefined,
+    brandId: filters.brandId || undefined,
     acceptanceStatus: filters.acceptanceStatus || undefined,
     paymentStatus: filters.paymentStatus || undefined,
     deliveryStatus: filters.deliveryStatus || undefined,

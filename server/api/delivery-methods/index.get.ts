@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
       ...(brandId ? { brandId: String(brandId) } : {}),
       ...(activeOnly === 'true' ? { isActive: true } : {}),
     },
+    include: { brand: { select: { id: true, name: true } } },
     orderBy: { name: 'asc' },
   })
 })

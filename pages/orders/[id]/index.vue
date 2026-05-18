@@ -147,7 +147,11 @@ watch(order, (o) => {
 const shareUrl = computed(() => {
   const hash = order.value?.shareHash as string
   if (!hash || !process.client) return ''
-  return `${globalThis.location.origin}/share/${hash}`
+  const brandName = (order.value?.brand as { name?: string } | undefined)?.name ?? 'zamowienie'
+  const brandSlug = brandName.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return `${globalThis.location.origin}/share/${brandSlug}/${hash}`
 })
 
 const orderFinancials = computed(() => {
@@ -254,7 +258,7 @@ const deliveryOptions = [
 
 // Print helper
 function printPage() {
-  if (process.client) window.print()
+  if (process.client) window.open(`/orders/${route.params.id}/print`, '_blank')
 }
 </script>
 
