@@ -1,5 +1,6 @@
 import Aura from '@primeuix/themes/aura'
 import { definePreset } from '@primeuix/themes'
+import tailwindcss from '@tailwindcss/vite'
 
 const NitkoTheme = definePreset(Aura, {
   semantic: {
@@ -48,7 +49,9 @@ export default defineNuxtConfig({
 
   css: ['primeicons/primeicons.css', '~/assets/css/main.css'],
 
-  vite: {},
+  vite: {
+    plugins: [tailwindcss()],
+  },
 
   primevue: {
     options: {

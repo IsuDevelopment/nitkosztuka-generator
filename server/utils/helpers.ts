@@ -12,14 +12,16 @@ export function formatMoney(value: number | string): string {
 }
 
 /**
- * Generate order number in format NS-2026-0001
+ * Generate order number in format NS/01/05/2026
+ * Pattern: {brand-prefix}/{seq}/{month}/{year}
  * Prefix is derived from brand name initials.
  */
-export function buildOrderNumber(brandName: string, year: number, seq: number): string {
+export function buildOrderNumber(brandName: string, year: number, month: number, seq: number): string {
   const prefix = brandName
     .split(/\s+/)
     .map((w) => w[0]?.toUpperCase() ?? '')
     .join('')
     .slice(0, 4)
-  return `${prefix}-${year}-${String(seq).padStart(4, '0')}`
+  const mm = String(month).padStart(2, '0')
+  return `${prefix}/${String(seq).padStart(2, '0')}/${mm}/${year}`
 }

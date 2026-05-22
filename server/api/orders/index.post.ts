@@ -44,11 +44,13 @@ export default defineEventHandler(async (event) => {
   if (!brand) throw createError({ statusCode: 404, message: 'Nie znaleziono marki' })
 
   // Generate order number
-  const year = new Date().getFullYear()
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
   const count = await prisma.order.count({
     where: { brandId: body.brandId, createdAt: { gte: new Date(`${year}-01-01`) } },
   })
-  const orderNumber = buildOrderNumber(brand.name, year, count + 1)
+  const orderNumber = buildOrderNumber(brand.name, year, month, count + 1)
 
   // Snapshot delivery method name from DB — never trust frontend string
   let snapshotDeliveryMethodName: string | null = null

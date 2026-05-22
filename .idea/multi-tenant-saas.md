@@ -78,11 +78,96 @@ Every list/detail endpoint that touches brand-scoped data:
 
 ## Implementation Order
 
+### Phase 0 — Feature Infrastructure (paywall-ready modularity)
+
+#### Data Model
+
+```prisma
+model Plan {
+  id        String        @id @default(uuid())
+  name      String        @db.VarChar(100) // "Free", "Pro", "Enterprise"
+  isDefault Boolean       @default(false) @map("is_default")
+  createdAt DateTime      @default(now()) @map("created_at")
+  features  PlanFeature[]
+  brands    Brand[]
+
+  @@map("plans")
+}
+
+model PlanFeature {
+  id      String  @id @default(uuid())
+  planId  String  @map("plan_id")
+  feature Feature
+  limit   Int?    // null = unlimited (e.g. max orders/month, max users)
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, feature])
+  @@map("plan_features")
+}
+
+enum Feature {
+  BRAND_CUSTOMIZATION   // colors, logo
+  MULTI_BRAND           // more than 1 brand
+  TEAM_MANAGEMENT       // invite users
+  ADVANCED_STATS        // extended analytics
+  SHARE_LINKS           // public share links
+  AUDIT_LOG             // change history
+  CUSTOM_DELIVERY       // custom delivery methods (limit = max count)
+  EXPORT_PDF            // PDF/print export
+  API_ACCESS            // external API tokens
+  NOTIFICATIONS         // email/push notifications
+}
+```
+
+#### Modified: `Brand`
+
+```prisma
+model Brand {
+  // existing fields...
+  planId String @map("plan_id")
+  plan   Plan   @relation(fields: [planId], references: [id])
+}
+```
+
+#### Implementation Steps
+
+1. Prisma migration: add `Plan`, `PlanFeature` tables, `Feature` enum, `Brand.planId`
+2. Seed: create "Free" plan (default) with basic features + limits
+3. `server/utils/features.ts`:
+   - `checkFeature(brandId, feature)` → boolean
+   - `requireFeature(event, brandId, feature)` → throws 403 with upgrade message
+   - `getFeatureLimit(brandId, feature)` → number | null
+4. `composables/useFeatures.ts`:
+   - `hasFeature(feature)` → reactive boolean
+   - `featureLimit(feature)` → reactive number | null
+5. `<UpgradePrompt>` component — shown in place of gated UI
+6. `GET /api/plans` — list available plans (public)
+7. `GET /api/brands/[id]/features` — current brand's active features
+
+#### Default "Free" Plan Features
+
+| Feature | Included | Limit |
+|---------|----------|-------|
+| SHARE_LINKS | ✅ | — |
+| CUSTOM_DELIVERY | ✅ | 3 |
+| AUDIT_LOG | ✅ | 7 days |
+| BRAND_CUSTOMIZATION | ❌ | — |
+| MULTI_BRAND | ❌ | 1 |
+| TEAM_MANAGEMENT | ❌ | 1 user |
+| ADVANCED_STATS | ❌ | — |
+| EXPORT_PDF | ❌ | — |
+| API_ACCESS | ❌ | — |
+| NOTIFICATIONS | ❌ | — |
+
+---
+
 ### Phase 1 — Foundation (non-breaking)
 1. Prisma migration: add `UserBrand` table, `User.isSuperAdmin`, Brand color/logo fields
 2. Seed script: assign existing admin as Super Admin + link to all brands
 3. Auth utils: `requireSuperAdmin()`, `requireBrandAccess()`, `getUserBrandIds()`
 4. Update all existing endpoints to use `getUserBrandIds()` for filtering
+5. Wrap brand-scoped mutations with `requireFeature()` where applicable
 
 ### Phase 2 — User Management
 5. `POST /api/users` — Super Admin creates users + assigns brand roles

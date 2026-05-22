@@ -44,8 +44,8 @@ At creation time, `index.post.ts` MUST:
 These fields are FROZEN for the life of the order. The order GET endpoint does NOT include the live `deliveryMethod` relation. Use `order.deliveryMethodName` for display.
 
 ### Order Number Format
-Generated server-side by `buildOrderNumber(brandName, year, sequentialCount)`.
-Format: `NS-2026-0001` (brand initials - year - zero-padded sequence).
+Generated server-side by `buildOrderNumber(brandName, year, month, sequentialCount)`.
+Format: `NS/01/05/2026` (brand initials / zero-padded sequence / zero-padded month / year).
 Never accept order numbers from the client.
 
 ### Status Workflow
