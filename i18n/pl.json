@@ -32,6 +32,8 @@
     "clientLink": "Skopiuj link dla klienta",
     "changePassword": "Zmień hasło",
     "logout": "Wyloguj",
+    "login": "Zaloguj się",
+    "loggingIn": "Logowanie...",
     "actions": "Akcje"
   },
   "field": {

@@ -14,6 +14,7 @@
             id="login"
             v-model="form.login"
             autocomplete="username"
+            :disabled="loading"
             :class="{ 'p-invalid': error }"
             placeholder="Twój login"
           />
@@ -26,6 +27,7 @@
             :feedback="false"
             toggle-mask
             autocomplete="current-password"
+            :disabled="loading"
             :class="{ 'p-invalid': error }"
             placeholder="Twoje hasło"
           />
@@ -33,9 +35,10 @@
         <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
         <Button
           type="submit"
-          label="Zaloguj się"
+          :label="loading ? $t('action.loggingIn') : $t('action.login')"
           class="w-full"
           :loading="loading"
+          :disabled="loading"
         />
       </form>
     </div>
@@ -45,6 +48,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: false })
 
+const { t: $t } = useI18n()
 const { fetch: refreshSession } = useUserSession()
 const router = useRouter()
 
@@ -53,6 +57,7 @@ const error = ref('')
 const loading = ref(false)
 
 async function handleLogin() {
+  if (loading.value) return
   error.value = ''
   loading.value = true
   try {

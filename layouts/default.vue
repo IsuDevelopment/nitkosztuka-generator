@@ -57,7 +57,7 @@
         <div class="topbar-spacer" />
         <div class="topbar-user">
           <NuxtLink to="/profile" class="topbar-user-name" :title="$t('nav.profile')">{{ user?.name }}</NuxtLink>
-          <Button icon="pi pi-sign-out" text rounded size="small" :title="$t('action.logout')" @click="logout" />
+          <Button icon="pi pi-sign-out" text rounded size="small" :title="$t('action.logout')" :loading="logoutLoading" :disabled="logoutLoading" @click="logout" />
         </div>
       </header>
 
@@ -70,14 +70,23 @@
 
 <script setup lang="ts">
 const { t: $t } = useI18n()
-const { user, clear } = useUserSession()
+const toast = useToast()
+const { user, fetch: refreshSession } = useUserSession()
 const sidebarCollapsed = ref(false)
-const router = useRouter()
+const logoutLoading = ref(false)
 
 async function logout() {
-  await $fetch('/api/auth/logout', { method: 'POST' })
-  await clear()
-  router.push('/login')
+  if (logoutLoading.value) return
+  logoutLoading.value = true
+  try {
+    await $fetch('/api/auth/logout', { method: 'POST' })
+    await refreshSession()
+    await navigateTo('/login', { replace: true })
+  } catch {
+    toast.add({ severity: 'error', summary: $t('error.generic'), life: 3000 })
+  } finally {
+    logoutLoading.value = false
+  }
 }
 </script>
 
