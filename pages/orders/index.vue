@@ -45,6 +45,11 @@
       <Column :header="$t('field.deliveryStatus')" style="width: 130px">
         <template #body="{ data }"><OrderStatusBadge type="delivery" :value="data.deliveryStatus" /></template>
       </Column>
+      <Column :header="$t('field.depositAmount')" style="width: 110px; text-align: right">
+        <template #body="{ data }">
+          <span>{{ fmtMoney(data.depositAmount) }}</span>
+        </template>
+      </Column>
       <Column :header="$t('stats.revenue')" style="width: 110px; text-align: right">
         <template #body="{ data }">
           <span class="profit-pos">{{ fmtMoney(data.revenue) }}</span>

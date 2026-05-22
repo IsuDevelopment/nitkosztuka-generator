@@ -83,6 +83,12 @@
         </div>
         <Button type="button" :label="$t('action.addProduct')" icon="pi pi-plus" outlined class="w-full mt-2" @click="addItem" />
 
+        <!-- Deposit -->
+        <div class="form-section-title">{{ $t('field.depositAmount') }}</div>
+        <div class="field">
+          <label>{{ $t('field.depositAmount') }}</label>
+          <InputNumber v-model="form.depositAmount" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" :min="0" class="w-full" />
+        </div>
         <!-- Discount -->
         <div class="form-section-title">{{ $t('section.discount') }}</div>
         <div class="field-row-2">
@@ -172,6 +178,7 @@ const form = reactive({
   notes: '',
   items: [] as ItemForm[],
 })
+  depositAmount: null as number | null,
 
 // Populate defaults when brand changes
 async function onBrandChange() {
@@ -254,6 +261,17 @@ async function submitOrder() {
   } finally {
     saving.value = false
   }
+    const payload = {
+      ...form,
+      depositAmount: form.depositAmount ?? undefined,
+      items: form.items.map(({ name, details, quantity, unitPrice, materialCost }) => ({
+        name,
+        details,
+        quantity,
+        unitPrice,
+        materialCost,
+      })),
+    }
 }
 
 // Init: load brand defaults on mount

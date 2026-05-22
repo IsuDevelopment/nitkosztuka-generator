@@ -68,6 +68,7 @@
     "deliveryCost": "Koszt dostawy",
     "leadTime": "Czas realizacji",
     "discount": "Rabat",
+    "depositAmount": "Zaliczka",
     "discountNote": "Powód rabatu",
     "taxRate": "Stawka podatkowa",
     "paymentText": "Informacja o płatności",

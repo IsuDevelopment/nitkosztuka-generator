@@ -82,6 +82,7 @@ export default defineEventHandler(async (event) => {
       ...(body.handmadeText !== undefined && { handmadeText: body.handmadeText.trim() }),
       ...(body.shareEnabled !== undefined && { shareEnabled: body.shareEnabled }),
       ...(body.notes !== undefined && { notes: body.notes?.trim() ?? null }),
+      ...(body.depositAmount !== undefined && { depositAmount: body.depositAmount }),
       ...(body.items !== undefined && {
         items: {
           deleteMany: {},

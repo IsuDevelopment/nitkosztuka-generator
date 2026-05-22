@@ -86,6 +86,12 @@
         </div>
         <Button type="button" :label="$t('action.addProduct')" icon="pi pi-plus" outlined class="w-full mt-2" @click="addItem" />
 
+        <!-- Deposit -->
+        <div class="form-section-title">{{ $t('field.depositAmount') }}</div>
+        <div class="field">
+          <label>{{ $t('field.depositAmount') }}</label>
+          <InputNumber v-model="form.depositAmount" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" :min="0" class="w-full" />
+        </div>
         <!-- Discount -->
         <div class="form-section-title">{{ $t('section.discount') }}</div>
         <div class="field-row-2">
@@ -182,6 +188,7 @@ const form = reactive({
   paymentText: '',
   handmadeText: '',
   notes: '',
+  depositAmount: null as number | null,
   items: [] as ItemForm[],
 })
 
@@ -200,6 +207,7 @@ if (order.value) {
   form.paymentText = (o.paymentText as string) ?? ''
   form.handmadeText = (o.handmadeText as string) ?? ''
   form.notes = (o.notes as string) ?? ''
+  form.depositAmount = o.depositAmount !== undefined ? Number(o.depositAmount) : null
   form.items = (o.items as ItemForm[] ?? []).map(i => ({
     id: i.id,
     name: i.name,
@@ -286,7 +294,20 @@ async function submitOrder() {
 
   saving.value = true
   try {
-    await $fetch(`/api/orders/${id}`, { method: 'PUT', body: toRaw(form) })
+    const payload = {
+      ...form,
+      depositAmount: form.depositAmount ?? undefined,
+      items: form.items.map(({ id, name, details, quantity, unitPrice, materialCost, sortOrder }) => ({
+        id,
+        name,
+        details,
+        quantity,
+        unitPrice,
+        materialCost,
+        sortOrder,
+      })),
+    }
+    await $fetch(`/api/orders/${id}`, { method: 'PUT', body: payload })
     toast.add({ severity: 'success', summary: 'Zamówienie zapisane', life: 3000 })
     router.push(`/orders/${id}`)
   } catch (err: unknown) {

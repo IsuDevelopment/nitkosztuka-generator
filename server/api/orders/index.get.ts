@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
     const grossProfit = revenue - materialCost - deliveryCost
     const netProfit = grossProfit - tax
     const { items: _items, ...rest } = o
-    return { ...rest, revenue, grossProfit, netProfit }
+    return { ...rest, revenue, grossProfit, netProfit, depositAmount: o.depositAmount !== undefined ? Number(o.depositAmount) : null }
   })
 
   return { orders: ordersWithFinancials, total, page: Number(page), limit: take }

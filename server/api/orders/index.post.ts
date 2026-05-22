@@ -26,6 +26,7 @@ interface CreateOrderBody {
   paymentText: string
   handmadeText: string
   notes?: string
+  depositAmount?: number
   items: OrderItemInput[]
 }
 
@@ -89,6 +90,7 @@ export default defineEventHandler(async (event) => {
       handmadeText: body.handmadeText?.trim() || (brand.defaultHandmadeText ?? ''),
       shareHash: generateShareHash(),
       notes: body.notes?.trim() ?? null,
+      depositAmount: body.depositAmount ?? null,
       createdById: user.id,
       items: {
         create: body.items.map((item, idx) => ({
