@@ -74,6 +74,10 @@
             <td>Dostawa: {{ order.deliveryMethodName || order.deliveryMethod?.name || '—' }}</td>
             <td>{{ formatMoney(order.deliveryCost) }}</td>
           </tr>
+          <tr v-if="order.depositAmount && Number(order.depositAmount) > 0">
+            <td>{{$t ? $t('field.depositAmount') : 'Zadatek'}}</td>
+            <td>{{ formatMoney(order.depositAmount) }}</td>
+          </tr>
           <tr class="paper-total">
             <td>Razem</td>
             <td>{{ formatMoney(grandTotal) }}</td>
