@@ -64,6 +64,14 @@
               <td>{{ $t('stats.revenue') }}</td>
               <td class="fin-val">{{ fmtMoney(orderFinancials.revenue) }}</td>
             </tr>
+            <tr>
+              <td>{{ $t('field.depositAmount') }}</td>
+              <td class="fin-val">{{ fmtMoney(orderFinancials.depositAmount) }}</td>
+            </tr>
+            <tr>
+              <td>{{ $t('field.remainingToPay') }}</td>
+              <td class="fin-val">{{ fmtMoney(orderFinancials.remainingToPay) }}</td>
+            </tr>
             <tr class="fin-cost">
               <td>{{ $t('stats.materialCost') }}</td>
               <td class="fin-val">− {{ fmtMoney(orderFinancials.materialCost) }}</td>
@@ -162,11 +170,13 @@ const orderFinancials = computed(() => {
   const materialCost = items.reduce((s, i) => s + Number(i.materialCost ?? 0) * Number(i.quantity), 0)
   const deliveryCost = Number(o.deliveryCost ?? 0)
   const discount = Number(o.discount ?? 0)
+  const depositAmount = Number(o.depositAmount ?? 0)
   const tax = Number(o.taxAmount ?? 0)
   const revenue = itemsTotal + deliveryCost - discount
+  const remainingToPay = Math.max(revenue - depositAmount, 0)
   const grossProfit = revenue - materialCost - deliveryCost
   const netProfit = grossProfit - tax
-  return { itemsTotal, materialCost, deliveryCost, discount, tax, revenue, grossProfit, netProfit }
+  return { itemsTotal, materialCost, deliveryCost, discount, depositAmount, remainingToPay, tax, revenue, grossProfit, netProfit }
 })
 
 const messageText = computed(() => {
@@ -176,14 +186,16 @@ const messageText = computed(() => {
   const client = o.client as Record<string, unknown> | undefined
   const delivery = (o.deliveryMethodName as string) || (o.deliveryMethod as Record<string, string> | undefined)?.name || '—'
   const itemsTotal = items.reduce((s, i) => s + Number(i.unitPrice) * Number(i.quantity), 0)
+  const depositAmount = Number(o.depositAmount ?? 0)
   const grandTotal = itemsTotal - Number(o.discount ?? 0) + Number(o.deliveryCost ?? 0)
+  const remainingToPay = Math.max(grandTotal - depositAmount, 0)
   const fmt = (v: number) => v.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' zł'
 
   const productLines = items.map((i) =>
     `- ${i.name}\n  Ustalenia: ${i.details || '—'}\n  Ilość: ${i.quantity} × ${fmt(Number(i.unitPrice))} = ${fmt(Number(i.unitPrice) * Number(i.quantity))}`,
   ).join('\n\n')
 
-  return `Dzień dobry 😊\n\nPrzesyłam podsumowanie ustaleń dotyczących zamówienia ${o.orderNumber}.\n\nDANE KLIENTA\nImię i nazwisko: ${client?.lastName} ${client?.firstName}\nKontakt: ${[client?.phone, client?.email].filter(Boolean).join(' / ') || '—'}\n\nDOSTAWA\nForma dostawy: ${delivery}\nDane do wysyłki:\n${o.deliveryDetails || '—'}\n\nPRODUKTY / USTALENIA\n${productLines || '—'}\n\nPŁATNOŚĆ\nProdukty: ${fmt(itemsTotal)}\nDostawa: ${fmt(Number(o.deliveryCost ?? 0))}\nRazem: ${fmt(grandTotal)}\n\n${o.paymentText || ''}\n\nCZAS REALIZACJI\n${o.leadTime}\n\nINFORMACJA O RĘKODZIELE\n${o.handmadeText || ''}\n\nDziękuję za zamówienie ❤️`
+  return `Dzień dobry 😊\n\nPrzesyłam podsumowanie ustaleń dotyczących zamówienia ${o.orderNumber}.\n\nDANE KLIENTA\nImię i nazwisko: ${client?.lastName} ${client?.firstName}\nKontakt: ${[client?.phone, client?.email].filter(Boolean).join(' / ') || '—'}\n\nDOSTAWA\nForma dostawy: ${delivery}\nDane do wysyłki:\n${o.deliveryDetails || '—'}\n\nPRODUKTY / USTALENIA\n${productLines || '—'}\n\nPŁATNOŚĆ\nProdukty: ${fmt(itemsTotal)}\nDostawa: ${fmt(Number(o.deliveryCost ?? 0))}\nZadatek: ${fmt(depositAmount)}\nPozostało do zapłaty: ${fmt(remainingToPay)}\nRazem: ${fmt(grandTotal)}\n\n${o.paymentText || ''}\n\nCZAS REALIZACJI\n${o.leadTime}\n\nINFORMACJA O RĘKODZIELE\n${o.handmadeText || ''}\n\nDziękuję za zamówienie ❤️`
 })
 
 async function saveStatus(field: string, value: string) {

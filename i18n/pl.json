@@ -69,6 +69,7 @@
     "leadTime": "Czas realizacji",
     "discount": "Rabat",
     "depositAmount": "Zadatek",
+    "remainingToPay": "Pozostało do zapłaty",
     "discountNote": "Powód rabatu",
     "taxRate": "Stawka podatkowa",
     "paymentText": "Informacja o płatności",
