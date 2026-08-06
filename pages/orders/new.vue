@@ -176,9 +176,9 @@ const form = reactive({
   paymentText: '',
   handmadeText: '',
   notes: '',
+  depositAmount: null as number | null,
   items: [] as ItemForm[],
 })
-  depositAmount: null as number | null,
 
 // Populate defaults when brand changes
 async function onBrandChange() {
