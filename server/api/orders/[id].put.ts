@@ -34,6 +34,8 @@ export default defineEventHandler(async (event) => {
     handmadeText?: string
     shareEnabled?: boolean
     notes?: string
+    depositAmount?: number
+    createdAt?: string
     items?: OrderItemInput[]
   }>(event)
 
@@ -83,6 +85,7 @@ export default defineEventHandler(async (event) => {
       ...(body.shareEnabled !== undefined && { shareEnabled: body.shareEnabled }),
       ...(body.notes !== undefined && { notes: body.notes?.trim() ?? null }),
       ...(body.depositAmount !== undefined && { depositAmount: body.depositAmount }),
+      ...(body.createdAt !== undefined && { createdAt: new Date(body.createdAt) }),
       ...(body.items !== undefined && {
         items: {
           deleteMany: {},

@@ -7,6 +7,13 @@
       </div>
 
       <form @submit.prevent="submitOrder">
+        <!-- Creation date -->
+        <div class="form-section-title">{{ $t('field.createdAt') }}</div>
+        <div class="field">
+          <label>{{ $t('field.createdAt') }}</label>
+          <DatePicker v-model="form.createdAt" date-format="dd.mm.yy" :show-icon="true" class="w-full" />
+        </div>
+
         <!-- Brand -->
         <div class="form-section-title">{{ $t('field.brand') }}</div>
         <div class="field">
@@ -164,6 +171,7 @@ interface ItemForm {
 }
 
 const form = reactive({
+  createdAt: new Date() as Date,
   brandId: brands.value[0]?.id ?? '',
   clientId: null as string | null,
   deliveryMethodId: null as string | null,
@@ -222,7 +230,7 @@ function formatMoney(v: number) {
 // Preview data derived from form
 const previewOrder = computed(() => ({
   orderNumber: 'PODGLĄD',
-  createdAt: new Date().toISOString(),
+  createdAt: form.createdAt.toISOString(),
   brand: selectedBrand.value ?? brands.value.find(b => b.id === form.brandId),
   client: selectedClient.value ?? undefined,
   deliveryMethod: deliveryMethods.value.find(m => m.id === form.deliveryMethodId),

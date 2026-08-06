@@ -10,6 +10,13 @@
       </div>
 
       <form @submit.prevent="submitOrder">
+        <!-- Creation date -->
+        <div class="form-section-title">{{ $t('field.createdAt') }}</div>
+        <div class="field">
+          <label>{{ $t('field.createdAt') }}</label>
+          <DatePicker v-model="form.createdAt" date-format="dd.mm.yy" :show-icon="true" class="w-full" />
+        </div>
+
         <!-- Brand -->
         <div class="form-section-title">{{ $t('field.brand') }}</div>
         <div class="field">
@@ -176,6 +183,7 @@ interface ItemForm {
 }
 
 const form = reactive({
+  createdAt: new Date() as Date,
   brandId: '',
   clientId: null as string | null,
   deliveryMethodId: null as string | null,
@@ -195,6 +203,7 @@ const form = reactive({
 // Pre-fill form from existing order
 if (order.value) {
   const o = order.value
+  form.createdAt = new Date(o.createdAt as string)
   form.brandId = o.brandId as string
   form.clientId = o.clientId as string
   form.deliveryMethodId = (o.deliveryMethodId as string | null) ?? null
@@ -264,7 +273,7 @@ function formatMoney(v: number) {
 
 const previewOrder = computed(() => ({
   orderNumber: (order.value?.orderNumber as string) ?? 'PODGLĄD',
-  createdAt: (order.value?.createdAt as string) ?? new Date().toISOString(),
+  createdAt: form.createdAt.toISOString(),
   brand: (selectedBrand.value ?? brands.value.find(b => b.id === form.brandId)) as { name?: string; subtitle?: string } | undefined,
   client: selectedClient.value as { firstName?: string; lastName?: string; email?: string; phone?: string } | null | undefined,
   deliveryMethod: deliveryMethods.value.find(m => m.id === form.deliveryMethodId) as { name?: string } | undefined,

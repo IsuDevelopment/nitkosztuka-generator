@@ -1,0 +1,1 @@
+Wszystkie instrukcje i skille znajduja sie w ./github
